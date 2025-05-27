@@ -1,11 +1,9 @@
-import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.Random;
+import java.util.Scanner;
 
 public class Main {
-    /* Dinh nghia cau truc */
     public static class Element {
-
         private int[] data;
 
         public Element(int size) {
@@ -16,8 +14,9 @@ public class Main {
         public void generateRandomData() {
             Random rand = new Random();
             for (int i = 0; i < data.length; i++) {
-                data[i] = rand.nextInt(1000);
+                data[i] = rand.nextInt(100);
             }
+            data[data.length - 1] = 1000;
         }
 
         public int get(int i) {
@@ -44,24 +43,36 @@ public class Main {
             this.StartIndex = StartIndex;
             this.EndIndex = EndIndex;
         }
-        public int getLocalMax(){
+
+        public int getLocalMax() {
             return LocalMax;
         }
 
         public void run() {
+            long startTime = System.nanoTime();
+
             for (int i = StartIndex; i < EndIndex; i++) {
-                if (LocalMax< element.get(i)) {
+                if (LocalMax < element.get(i)) {
                     LocalMax = element.get(i);
                 }
             }
-            LocalDateTime now = LocalDateTime.now();
-            System.out.println(Thread.currentThread().getName() + " Max Value : " + LocalMax + " Time find out : " + now);
+
+            long endTime = System.nanoTime();
+            double result = (endTime - startTime) / 1_000_000.0;
+
+            System.out.println(Thread.currentThread().getName() +
+                    " Max Value: " + LocalMax +
+                    " | Time Taken: " + result + " ms");
         }
     }
 
     public static void main(String[] args) throws InterruptedException {
-        int dataSize = 10;
-        int K = 4;
+        int dataSize, K;
+        Scanner sc = new Scanner(System.in);
+        System.out.println("Nhap so phan tu: ");
+        dataSize = sc.nextInt();
+        System.out.println("Nhap GAP: ");
+        K = sc.nextInt();
         ConfigQueue[] threads = new ConfigQueue[K];
 
         Element e = new Element(dataSize);
@@ -69,10 +80,7 @@ public class Main {
         System.out.println("== Mang du lieu ==");
         e.printData();
 
-//        for (int i = 0; i < K; i++) {
-//            threads[i] = new ConfigQueue(e, 0, dataSize);
-//            threads[i].start();
-//        }
+
 
 
         int Gap = dataSize / K;
@@ -86,12 +94,13 @@ public class Main {
         for (int i = 0; i < K; i++) {
             threads[i].join();
         }
+
         int finalMax = Integer.MIN_VALUE;
         for (int i = 0; i < K; i++) {
             if (threads[i].getLocalMax() > finalMax) {
                 finalMax = threads[i].getLocalMax();
             }
         }
-        System.out.println("Max : "+ finalMax);
+        System.out.println("==> Max: " + finalMax);
     }
 }
